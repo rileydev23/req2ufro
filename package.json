@@ -1,0 +1,36 @@
+{
+  "name": "req2ufro",
+  "version": "1.0.0",
+  "main": "dist/app.ts",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "tsc && node dist/app.js",
+    "dev": "nodemon --exec node --no-warnings=ExperimentalWarning --loader ts-node/esm src/app.ts",
+    "lint": "eslint ."
+  },
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "-": "^0.0.1",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.17.1",
+    "mongoose": "^8.7.0",
+    "save": "^2.9.0",
+    "save-dev": "^0.0.1-security"
+  },
+  "type": "module",
+  "devDependencies": {
+    "@eslint/js": "^9.12.0",
+    "@types/cors": "^2.8.17",
+    "@types/dotenv": "^6.1.1",
+    "@types/express": "^4.17.6",
+    "eslint": "^9.12.0",
+    "globals": "^15.10.0",
+    "nodemon": "^3.1.7",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.6.2",
+    "typescript-eslint": "^8.8.0"
+  }
+}
