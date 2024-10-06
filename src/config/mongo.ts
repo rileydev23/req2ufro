@@ -38,5 +38,5 @@ export default async function connectDB() {
  * Optional: In this method u can import all models in order to force register collections in database
  */
 async function registerModels() {
-  await import("../schemas/user.schema.js");
+  await User.find();
 }
