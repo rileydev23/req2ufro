@@ -14,7 +14,7 @@ app.use(
 app.use(express.json());
 app.get("/", (req, res) => {
   res.send({
-    message: "miau!",
+    message: "miaau!",
   });
 });
 
