@@ -1,7 +1,7 @@
 import { connect } from "mongoose";
 
-import { MONGO_URI } from "./environment.js";
-import User from "../schemas/user.schema.js";
+import { MONGO_URI } from "./environment";
+import User from "../schemas/user.schema";
 
 export default async function connectDB() {
   try {
@@ -10,6 +10,14 @@ export default async function connectDB() {
     await registerModels();
 
     // validate if
+
+    // Create default user if not exists
+    const userExists = await User.exists({ email: "administrator@uflow.com" });
+
+    if (userExists) {
+      console.log("Default user already exists");
+      return true;
+    }
 
     const user = new User({
       name: "Administrator",
