@@ -1,24 +1,29 @@
 import express from "express";
 import { PORT } from "./config/environment";
 import connectDB from "./config/mongo";
+import semesterRouter from "./routes/semester.routes"; // Asegúrate de que este camino sea correcto
 import cors from "cors";
 
 const app = express();
 
+// Configuración de CORS
 app.use(
   cors({
-    origin: ["*"], // Comma separated list of your urls to access your api. * means allow everything
-    credentials: true, // Allow cookies to be sent with requests
+    origin: ["*"], // Lista de tus URLs para acceder a tu API. * permite todo
+    credentials: true, // Permite que las cookies sean enviadas con las solicitudes
   })
 );
 app.use(express.json());
+
+app.use("/api", semesterRouter);
+
 app.get("/", (req, res) => {
   res.send({
     message: "miaau!",
   });
 });
 
-async function startSever() {
+async function startServer() {
   console.log("Conectando a la base de datos...");
   const isConnected = await connectDB();
   if (isConnected) {
@@ -30,6 +35,6 @@ async function startSever() {
   }
 }
 
-startSever();
+startServer();
 
 export default app;
