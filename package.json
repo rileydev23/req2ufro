@@ -4,7 +4,10 @@
   "main": "app.js",
   "scripts": {
     "start": "nodemon src/app.js",
-    "test": "jest --watchAll --detectOpenHandles"
+    "test": "jest --watchAll --detectOpenHandles",
+    "test:smoke": "mocha 'src/test/smoke/*.test.js' --timeout 10000 --exit",
+    "test:integration": "mocha 'src/test/integration/*.test.js' --timeout 10000 --exit",
+    "test:unit": "jest"
   },
   "type": "module",
   "jest": {
@@ -20,13 +23,16 @@
     "dotenv": "^16.4.5",
     "express": "^4.21.1",
     "mongoose": "^8.7.1",
-    "nodemon": "^3.1.7"
+    "nodemon": "^3.1.7",
+    "re2ufrojs": "file:"
   },
   "devDependencies": {
     "@babel/core": "^7.25.8",
     "@babel/preset-env": "^7.25.8",
     "babel-jest": "^29.7.0",
+    "chai": "^5.1.2",
     "jest": "^29.7.0",
+    "mocha": "^10.7.3",
     "supertest": "^7.0.0"
   }
 }

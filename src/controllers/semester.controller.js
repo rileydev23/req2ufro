@@ -66,3 +66,5 @@ export const deleteSemester = async (req, res) => {
     res.status(500).json({ error: 'Error al eliminar el semestre' });
   }
 };
+
+

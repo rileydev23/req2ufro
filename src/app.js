@@ -2,7 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import semesterRouter from './routes/semester.routes.js';
 import { PORT } from './config/environment.js';
-import database from './config/mongo.js'; 
+import connectDB from './config/mongo.js'; 
 
 const app = express();
 
@@ -15,10 +15,19 @@ app.get('/', (req, res) => {
   res.send({ message: 'Hello, World!' });
 });
 
-database.connect().then(() => {
-  app.listen(PORT, () => {
-    console.log(`Servidor corriendo en http://localhost:${PORT} 🚀`);
-  });
-});
+async function startServer() {
+  const isConnected= await connectDB();
+  if(isConnected){
+    app.listen(PORT, () => {
+      console.log(`Backend en http://localhost:${PORT}`);
+    });
+  }
+  else{
+    console.log(`Server did not start on ${PORT}`)
+		process.exit();
+  }
+}
+
+startServer();
 
 export default app;
