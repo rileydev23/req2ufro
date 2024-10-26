@@ -12,11 +12,13 @@ before(async () => {
   if (!isConnected) {
     throw new Error('No se pudo conectar a la base de datos');
   }
+  console.log('Base de datos conectada');
 });
 
 // Cerrar la conexión a la base de datos después de todas las pruebas
 after(async () => {
   await mongoose.connection.close();
+  console.log('Conexión cerrada');
 });
 
 describe('Pruebas de Regresión para Semestres', () => {
@@ -24,7 +26,11 @@ describe('Pruebas de Regresión para Semestres', () => {
     const response = await request(app).post('/api/semester').send({
       name: 'Semestre de Prueba',
       year: 2024,
-      subjects: [{ name: 'Prueba', grades: [100] }],
+      startDate: '2024-03-01',
+      endDate: '2024-07-01',
+      subjects: [],
+      users: [],
+      owner: new mongoose.Types.ObjectId(),
     });
     expect(response.status).to.equal(201);
     expect(response.body).to.have.property('semestre');
@@ -54,5 +60,6 @@ describe('Pruebas de Regresión para Semestres', () => {
   it('Debería eliminar el semestre correctamente', async () => {
     const response = await request(app).delete(`/api/semester/${createdSemesterId}`);
     expect(response.status).to.equal(200);
+    expect(response.body.message).to.equal('Semestre eliminado');
   });
 });

@@ -1,22 +1,17 @@
 import request from 'supertest';
 import mongoose from 'mongoose';
+import { expect } from 'chai';
 import app from '../../app.js';
 import Semester from '../../schemas/semester.schema.js';
 
-beforeAll(async () => {
+before(async () => {
   await mongoose.connect(process.env.MONGO_URI);
+  console.log('Base de datos conectada');
 });
 
-beforeEach(async () => {
-  await Semester.deleteMany({});
-});
-
-afterEach(async () => {
-  await Semester.deleteMany({});
-});
-
-afterAll(async () => {
+after(async () => {
   await mongoose.connection.close();
+  console.log('Conexión cerrada');
 });
 
 describe('Controlador de Semestres (Integración)', () => {
@@ -27,10 +22,7 @@ describe('Controlador de Semestres (Integración)', () => {
         year: 2024,
         startDate: '2024-03-01',
         endDate: '2024-07-01',
-        subjects: [
-          { name: 'Matemáticas', grades: [90, 85] },
-          { name: 'Historia', grades: [] },
-        ],
+        subjects: [],
         owner: new mongoose.Types.ObjectId(),
         users: [],
       };
@@ -40,11 +32,9 @@ describe('Controlador de Semestres (Integración)', () => {
         .send(semestreData)
         .expect(201);
 
-      expect(response.body.message).toBe('Semestre creado exitosamente');
-      expect(response.body.semester).toHaveProperty('_id');
-      expect(response.body.semester.name).toBe(semestreData.name);
-      expect(response.body.semester.year).toBe(semestreData.year);
-      expect(response.body.semester.subjects).toHaveLength(2);
+      expect(response.body.message).to.equal('Semestre creado exitosamente');
+      expect(response.body.semestre).to.have.property('_id');
+      expect(response.body.semestre.name).to.equal(semestreData.name);
     });
   });
 
@@ -55,7 +45,7 @@ describe('Controlador de Semestres (Integración)', () => {
         year: 2024,
         startDate: '2024-03-01',
         endDate: '2024-07-01',
-        subjects: [{ name: 'Matemáticas', grades: [90, 85] }],
+        subjects: [],
         owner: new mongoose.Types.ObjectId(),
         users: [],
       });
@@ -64,8 +54,8 @@ describe('Controlador de Semestres (Integración)', () => {
         .get(`/api/semester/${semestre._id}`)
         .expect(200);
 
-      expect(response.body).toHaveProperty('_id', semestre._id.toString());
-      expect(response.body.name).toBe('Semestre 1');
+      expect(response.body).to.have.property('_id').that.equals(semestre._id.toString());
+      expect(response.body.name).to.equal('Semestre 1');
     });
 
     it('debería devolver un error si el semestre no se encuentra', async () => {
@@ -73,7 +63,7 @@ describe('Controlador de Semestres (Integración)', () => {
         .get('/api/semester/609b4b64b3c1b2a0f0b85c1a')
         .expect(404);
 
-      expect(response.body.message).toBe('Semestre no encontrado');
+      expect(response.body.message).to.equal('Semestre no encontrado');
     });
   });
 
@@ -84,7 +74,7 @@ describe('Controlador de Semestres (Integración)', () => {
         year: 2024,
         startDate: '2024-03-01',
         endDate: '2024-07-01',
-        subjects: [{ name: 'Matemáticas', grades: [90, 85] }],
+        subjects: [],
         owner: new mongoose.Types.ObjectId(),
         users: [],
       });
@@ -94,7 +84,7 @@ describe('Controlador de Semestres (Integración)', () => {
         .send({ name: 'Semestre 1 Actualizado', year: 2024 })
         .expect(200);
 
-      expect(response.body.semester.name).toBe('Semestre 1 Actualizado');
+      expect(response.body.semestre.name).to.equal('Semestre 1 Actualizado');
     });
 
     it('debería devolver un error si el semestre a editar no se encuentra', async () => {
@@ -103,7 +93,7 @@ describe('Controlador de Semestres (Integración)', () => {
         .send({ name: 'Semestre Inexistente' })
         .expect(404);
 
-      expect(response.body.message).toBe('Semestre no encontrado');
+      expect(response.body.message).to.equal('Semestre no encontrado');
     });
   });
 
@@ -114,7 +104,7 @@ describe('Controlador de Semestres (Integración)', () => {
         year: 2024,
         startDate: '2024-03-01',
         endDate: '2024-07-01',
-        subjects: [{ name: 'Matemáticas', grades: [90, 85] }],
+        subjects: [],
         owner: new mongoose.Types.ObjectId(),
         users: [],
       });
@@ -123,10 +113,10 @@ describe('Controlador de Semestres (Integración)', () => {
         .delete(`/api/semester/${semestre._id}`)
         .expect(200);
 
-      expect(response.body.message).toBe('Semestre eliminado');
+      expect(response.body.message).to.equal('Semestre eliminado');
 
       const checkDeleted = await Semester.findById(semestre._id);
-      expect(checkDeleted).toBeNull();
+      expect(checkDeleted).to.be.null;
     });
 
     it('debería devolver un error si el semestre a eliminar no se encuentra', async () => {
@@ -134,7 +124,7 @@ describe('Controlador de Semestres (Integración)', () => {
         .delete('/api/semester/609b4b64b3c1b2a0f0b85c1a')
         .expect(404);
 
-      expect(response.body.message).toBe('Semestre no encontrado');
+      expect(response.body.message).to.equal('Semestre no encontrado');
     });
   });
 
@@ -155,7 +145,7 @@ describe('Controlador de Semestres (Integración)', () => {
         .expect(200);
 
       const weeks = response.body.weeksDuration;
-      expect(weeks).toBe(18);
+      expect(weeks).to.equal(18);
     });
   });
 });

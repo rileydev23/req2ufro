@@ -1,6 +1,9 @@
 import express from 'express';
 import cors from 'cors';
 import semesterRouter from './routes/semester.routes.js';
+import userRouter from './routes/user.routes.js';
+import subjectRouter from './routes/subject.routes.js';
+import eventRouter from './routes/event.routes.js';
 import { PORT } from './config/environment.js';
 import connectDB from './config/mongo.js'; 
 
@@ -10,7 +13,7 @@ app.use(cors());
 app.use(express.json());
 
 app.use('/api/users', userRouter);
-app.use('/api/semesters', semesterRouter);
+app.use('/api/semester', semesterRouter);
 app.use('/api/subjects', subjectRouter);
 app.use('/api/events', eventRouter);
 

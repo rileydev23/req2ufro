@@ -1,5 +1,5 @@
 import mongoose from 'mongoose';
-import SubjectSchema from './subject.schema.js';
+import Subject from './subject.schema.js';
 
 const SemesterSchema = new mongoose.Schema({
   name: { type: String, required: true },
@@ -10,25 +10,47 @@ const SemesterSchema = new mongoose.Schema({
   users: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }], // usuarios que estan en el semestre
   owner: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true }, // dueño del semestre
   average: { type: Number, default: 0 }, // promedio de las asignaturas del semestre
+  weeksDuration: { type: Number }, // duración en semanas del semestre
 });
 
-// Método para calcular el promedio general de todas las asignaturas del semestre
-SemesterSchema.methods.calculateGeneralAverage = function () {
-  if (this.subjects.length === 0) return 0;
-
-  const totalAverage = this.subjects.reduce((sum, subject) => {
-    return sum + subject.calculateAverage(); // Calcula el promedio de cada asignatura
-  }, 0);
-
-  this.average = totalAverage / this.subjects.length;
-  return this.average;
-};
-
-// Método para calcular el número de semanas del semestre
-SemesterSchema.methods.getWeeksDuration = function () {
+// Hook para calcular la duración en semanas antes de guardar
+SemesterSchema.pre('save', function (next) {
   const oneWeek = 1000 * 60 * 60 * 24 * 7; // Milisegundos en una semana
   const durationInMillis = this.endDate - this.startDate;
-  return Math.ceil(durationInMillis / oneWeek);
+  this.weeksDuration = Math.ceil(durationInMillis / oneWeek);
+  next();
+});
+
+// Hook para calcular el promedio general antes de guardar
+SemesterSchema.pre('save', async function (next) {
+  if (this.subjects.length === 0) {
+    this.average = 0;
+    return next();
+  }
+
+  // Cargar las asignaturas referenciadas para calcular su promedio
+  const subjects = await Subject.find({ _id: { $in: this.subjects } });
+
+  const totalAverage = subjects.reduce((sum, subject) => {
+    return sum + subject.calculateAverage(); // Usar el método de cada asignatura
+  }, 0);
+
+  this.average = totalAverage / subjects.length; // Calcular el promedio general
+  next();
+});
+
+// Método para calcular el promedio general de todas las asignaturas (se puede usar manualmente)
+SemesterSchema.methods.calculateGeneralAverage = async function () {
+  if (this.subjects.length === 0) return 0;
+
+  const subjects = await Subject.find({ _id: { $in: this.subjects } });
+
+  const totalAverage = subjects.reduce((sum, subject) => {
+    return sum + subject.calculateAverage();
+  }, 0);
+
+  this.average = totalAverage / subjects.length;
+  return this.average;
 };
 
 const Semester = mongoose.model('Semester', SemesterSchema);
