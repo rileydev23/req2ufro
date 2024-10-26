@@ -1,6 +1,6 @@
 import request from 'supertest';
 import mongoose from 'mongoose';
-import app from '../../app.js'; 
+import app from '../../app.js';
 import Semester from '../../schemas/semester.schema.js';
 
 beforeAll(async () => {
@@ -25,22 +25,26 @@ describe('Controlador de Semestres (Integración)', () => {
       const semestreData = {
         name: 'Semestre 1',
         year: 2024,
+        startDate: '2024-03-01',
+        endDate: '2024-07-01',
         subjects: [
           { name: 'Matemáticas', grades: [90, 85] },
           { name: 'Historia', grades: [] },
         ],
+        owner: new mongoose.Types.ObjectId(),
+        users: [],
       };
 
       const response = await request(app)
-        .post('/api/semester') 
+        .post('/api/semester')
         .send(semestreData)
         .expect(201);
 
       expect(response.body.message).toBe('Semestre creado exitosamente');
-      expect(response.body.semestre).toHaveProperty('_id');
-      expect(response.body.semestre.name).toBe(semestreData.name);
-      expect(response.body.semestre.year).toBe(semestreData.year);
-      expect(response.body.semestre.subjects).toHaveLength(2);
+      expect(response.body.semester).toHaveProperty('_id');
+      expect(response.body.semester.name).toBe(semestreData.name);
+      expect(response.body.semester.year).toBe(semestreData.year);
+      expect(response.body.semester.subjects).toHaveLength(2);
     });
   });
 
@@ -49,11 +53,15 @@ describe('Controlador de Semestres (Integración)', () => {
       const semestre = await Semester.create({
         name: 'Semestre 1',
         year: 2024,
+        startDate: '2024-03-01',
+        endDate: '2024-07-01',
         subjects: [{ name: 'Matemáticas', grades: [90, 85] }],
+        owner: new mongoose.Types.ObjectId(),
+        users: [],
       });
 
       const response = await request(app)
-        .get(`/api/semester/${semestre._id}`) 
+        .get(`/api/semester/${semestre._id}`)
         .expect(200);
 
       expect(response.body).toHaveProperty('_id', semestre._id.toString());
@@ -62,7 +70,7 @@ describe('Controlador de Semestres (Integración)', () => {
 
     it('debería devolver un error si el semestre no se encuentra', async () => {
       const response = await request(app)
-        .get('/api/semester/609b4b64b3c1b2a0f0b85c1a') 
+        .get('/api/semester/609b4b64b3c1b2a0f0b85c1a')
         .expect(404);
 
       expect(response.body.message).toBe('Semestre no encontrado');
@@ -74,7 +82,11 @@ describe('Controlador de Semestres (Integración)', () => {
       const semestre = await Semester.create({
         name: 'Semestre 1',
         year: 2024,
+        startDate: '2024-03-01',
+        endDate: '2024-07-01',
         subjects: [{ name: 'Matemáticas', grades: [90, 85] }],
+        owner: new mongoose.Types.ObjectId(),
+        users: [],
       });
 
       const response = await request(app)
@@ -82,7 +94,7 @@ describe('Controlador de Semestres (Integración)', () => {
         .send({ name: 'Semestre 1 Actualizado', year: 2024 })
         .expect(200);
 
-      expect(response.body.semestre.name).toBe('Semestre 1 Actualizado');
+      expect(response.body.semester.name).toBe('Semestre 1 Actualizado');
     });
 
     it('debería devolver un error si el semestre a editar no se encuentra', async () => {
@@ -100,7 +112,11 @@ describe('Controlador de Semestres (Integración)', () => {
       const semestre = await Semester.create({
         name: 'Semestre 1',
         year: 2024,
+        startDate: '2024-03-01',
+        endDate: '2024-07-01',
         subjects: [{ name: 'Matemáticas', grades: [90, 85] }],
+        owner: new mongoose.Types.ObjectId(),
+        users: [],
       });
 
       const response = await request(app)
@@ -115,10 +131,31 @@ describe('Controlador de Semestres (Integración)', () => {
 
     it('debería devolver un error si el semestre a eliminar no se encuentra', async () => {
       const response = await request(app)
-        .delete('/api/semester/609b4b64b3c1b2a0f0b85c1a') 
+        .delete('/api/semester/609b4b64b3c1b2a0f0b85c1a')
         .expect(404);
 
       expect(response.body.message).toBe('Semestre no encontrado');
+    });
+  });
+
+  describe('Calcular duración en semanas del semestre', () => {
+    it('debería calcular correctamente las semanas del semestre', async () => {
+      const semestre = await Semester.create({
+        name: 'Semestre 1',
+        year: 2024,
+        startDate: '2024-03-01',
+        endDate: '2024-07-01',
+        subjects: [],
+        owner: new mongoose.Types.ObjectId(),
+        users: [],
+      });
+
+      const response = await request(app)
+        .get(`/api/semester/${semestre._id}`)
+        .expect(200);
+
+      const weeks = response.body.weeksDuration;
+      expect(weeks).toBe(18);
     });
   });
 });

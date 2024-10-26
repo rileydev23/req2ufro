@@ -9,7 +9,10 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-app.use('/api', semesterRouter);
+app.use('/api/users', userRouter);
+app.use('/api/semesters', semesterRouter);
+app.use('/api/subjects', subjectRouter);
+app.use('/api/events', eventRouter);
 
 app.get('/', (req, res) => {
   res.send({ message: 'Hello, World!' });

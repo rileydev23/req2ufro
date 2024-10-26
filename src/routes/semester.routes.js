@@ -3,10 +3,10 @@ import { createSemester, getSemester, editSemester, deleteSemester, getAllSemest
 
 const router = express.Router();
 
-router.post('/semester', createSemester);
-router.get('/semester/:id', getSemester);
-router.put('/semester/:id', editSemester);
-router.delete('/semester/:id', deleteSemester);
-router.get('/semester', getAllSemesters);
+router.post('/', createSemester);
+router.get('/:id', getSemester);
+router.put('/:id', editSemester);
+router.delete('/:id', deleteSemester);
+router.get('/', getAllSemesters);
 
 export default router;
