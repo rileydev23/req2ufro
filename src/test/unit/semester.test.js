@@ -49,7 +49,7 @@ describe('Controlador de Semestres (Unitarias)', () => {
       await createSemester(req, res);
 
       expect(res.status).toHaveBeenCalledWith(500);
-      expect(res.json).toHaveBeenCalledWith({ error: 'Error al crear el semestre' });
+      expect(res.json).toHaveBeenCalledWith({ error: 'Error al crear el semestre', details: 'Error' });
     });
   });
 
@@ -75,7 +75,7 @@ describe('Controlador de Semestres (Unitarias)', () => {
       await getSemester(req, res);
 
       expect(res.status).toHaveBeenCalledWith(404);
-      expect(res.json).toHaveBeenCalledWith({ message: 'Semestre no encontrado' });
+      expect(res.json).toHaveBeenCalledWith({ message: 'Semestre no encontrado'});
     });
   });
 
@@ -127,7 +127,7 @@ describe('Controlador de Semestres (Unitarias)', () => {
       await deleteSemester(req, res);
 
       expect(res.status).toHaveBeenCalledWith(404);
-      expect(res.json).toHaveBeenCalledWith({ message: 'Semestre no encontrado' });
+      expect(res.json).toHaveBeenCalledWith({ message: 'Semestre no encontrado'});
     });
   });
 
@@ -155,7 +155,7 @@ describe('Controlador de Semestres (Unitarias)', () => {
       await getAllSemesters(req, res);
 
       expect(res.status).toHaveBeenCalledWith(500);
-      expect(res.json).toHaveBeenCalledWith({ error: 'Error al obtener los semestres' });
+      expect(res.json).toHaveBeenCalledWith({ error: 'Error al obtener los semestres'});
     });
   });
 });
