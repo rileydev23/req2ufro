@@ -155,7 +155,7 @@ describe('Controlador de Semestres (Unitarias)', () => {
       await getAllSemesters(req, res);
 
       expect(res.status).toHaveBeenCalledWith(500);
-      expect(res.json).toHaveBeenCalledWith({ error: 'Error al obtener los semestres'});
+      expect(res.json).toHaveBeenCalledWith({ error: 'Error al obtener los semestres',  details: "Error"});
     });
   });
 });

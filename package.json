@@ -8,7 +8,8 @@
     "test:smoke": "mocha 'src/test/smoke/*.test.js' --timeout 10000 --exit",
     "test:integration": "mocha 'src/test/integration/*.test.js' --timeout 10000 --exit",
     "test:regresion": "mocha 'src/test/regresion/*.test.js' --timeout 10000 --exit",
-    "test:unit": "jest --roots src/test/unit"
+    "test:unit": "jest --roots src/test/unit",
+    "test:unit:semester": "jest src/test/unit/semester"
   },
   "type": "module",
   "jest": {

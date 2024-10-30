@@ -22,7 +22,7 @@ export const createSemester = async (req, res) => {
 
 export const getAllSemesters = async (req, res) => {
   try {
-    const semestres = await Semester.find().populate('subjects').populate('users');
+    const semestres = await Semester.find();
     res.status(200).json(semestres);
   } catch (error) {
     res.status(500).json({ error: 'Error al obtener los semestres', details: error.message });
@@ -33,7 +33,7 @@ export const getSemester = async (req, res) => {
   const { id } = req.params;
 
   try {
-    const semestre = await Semester.findById(id).populate('subjects').populate('users');
+    const semestre = await Semester.findById(id);
     if (!semestre) {
       return res.status(404).json({ message: 'Semestre no encontrado' });
     }
@@ -52,7 +52,7 @@ export const editSemester = async (req, res) => {
       id,
       { name, year, startDate, endDate, subjects, users },
       { new: true, runValidators: true }
-    ).populate('subjects').populate('users');
+    );
 
     if (!semestre) {
       return res.status(404).json({ message: 'Semestre no encontrado' });
