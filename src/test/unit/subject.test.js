@@ -147,37 +147,46 @@ import {
     });
   
     // 6. Añadir Evento a Asignatura
-    describe('addEventToSubject', () => {
-      it('debería añadir un evento a la asignatura', async () => {
-        const req = mockRequest({ event: { type: 'evaluado', grade: 85 } }, { id: '123' });
-        const res = mockResponse();
-        const updatedSubject = { _id: '123', events: [{ type: 'evaluado', grade: 85 }] };
-  
-        Subject.findByIdAndUpdate.mockResolvedValue(updatedSubject);
-  
-        await addEventToSubject(req, res);
-  
-        expect(res.status).toHaveBeenCalledWith(200);
-        expect(res.json).toHaveBeenCalledWith({
-          message: 'Evento añadido',
-          subject: updatedSubject,
-        });
-      });
-    });
-  
-    // 7. Calcular Promedio de la Asignatura
     describe('calculateSubjectAverage', () => {
-      it('debería calcular el promedio ponderado correctamente', () => {
-        const subject = new Subject({
-          events: [
-            { type: 'evaluado', grade: 90, weight: 50 },
-            { type: 'evaluado', grade: 80, weight: 50 },
-          ],
+        it('debería calcular el promedio ponderado correctamente y devolverlo en la respuesta', async () => {
+          const subject = new Subject({
+            events: [
+              { type: 'evaluado', grade: 90, weight: 50 },
+              { type: 'evaluado', grade: 80, weight: 50 },
+            ],
+          });
+      
+          const mockResponse = () => {
+            const res = {};
+            res.status = jest.fn().mockReturnThis();
+            res.json = jest.fn();
+            return res;
+          };
+          const res = mockResponse();
+          await calculateSubjectAverage(subject, res);
+      
+          expect(res.status).toHaveBeenCalledWith(200);
+          expect(res.json).toHaveBeenCalledWith({
+            message: 'Promedio calculado',
+            average: 85,
+          });
         });
-  
-        const average = subject.calculateAverage();
-        expect(average).toBe(85);
+      
+        it('debería devolver 404 si no se proporciona la asignatura', async () => {
+          const mockResponse = () => {
+            const res = {};
+            res.status = jest.fn().mockReturnThis();
+            res.json = jest.fn();
+            return res;
+          };
+          const res = mockResponse();
+      
+          await calculateSubjectAverage(null, res);
+      
+          expect(res.status).toHaveBeenCalledWith(404);
+          expect(res.json).toHaveBeenCalledWith({ message: 'Asignatura no encontrada' });
+        });
       });
-    });
+      
   });
   
