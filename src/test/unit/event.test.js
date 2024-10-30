@@ -149,16 +149,16 @@ import {
     // 6. Verificar si el Evento es Evaluado
     describe('isEvaluatedEvent', () => {
       it('debería devolver true para un evento evaluado', () => {
-        const event = new Event({ type: 'evaluado' });
+        const event = { type: 'evaluado' };
   
-        const result = event.isEvaluated();
+        const result = isEvaluatedEvent(event);
         expect(result).toBe(true);
       });
   
       it('debería devolver false para un evento no evaluado', () => {
-        const event = new Event({ type: 'recordatorio' });
+        const event = { type: 'recordatorio' };
   
-        const result = event.isEvaluated();
+        const result = isEvaluatedEvent(event);
         expect(result).toBe(false);
       });
     });
@@ -171,7 +171,7 @@ import {
           { type: 'evaluado', weight: 30 },
         ];
   
-        const totalWeight = Event.calculateTotalWeight(events);
+        const totalWeight = calculateEventWeight(events);
         expect(totalWeight).toBe(80);
       });
     });
