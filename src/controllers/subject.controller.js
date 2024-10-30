@@ -4,10 +4,10 @@ import Subject from "../schemas/subject.schema.js";
 export const createSubject = async (req, res) => {
   try {
     const newSubject = new Subject(req.body);
-    await newSubject.save();
+    const savedSubject = await newSubject.save();
     res.status(201).json({
       message: "Asignatura creada exitosamente",
-      subject: newSubject,
+      subject: savedSubject,
     });
   } catch (error) {
     res.status(500).json({ error: "Error al crear la asignatura" });
@@ -72,37 +72,48 @@ export const deleteSubject = async (req, res) => {
 
 // Agregar un evento al Subject
 export const addEventToSubject = async (req, res) => {
-  try {
-    const subject = await Subject.findById(req.params.id);
-    if (!subject) {
-      return res.status(404).json({ message: "Asignatura no encontrada" });
+    try {
+      const updatedSubject = await Subject.findByIdAndUpdate(
+        req.params.id,
+        { $push: { events: req.body.event } },
+        { new: true } 
+      );
+  
+      if (!updatedSubject) {
+        return res.status(404).json({ message: "Asignatura no encontrada" });
+      }
+  
+      res.status(200).json({
+        message: "Evento añadido",
+        subject: updatedSubject,
+      });
+    } catch (error) {
+      res.status(500).json({ error: "Error al añadir el evento a la asignatura" });
     }
-    subject.events.push(req.body.event);
-    await subject.save();
-    res.status(200).json({
-      message: "Evento añadido",
-      subject,
-    });
-  } catch (error) {
-    res
-      .status(500)
-      .json({ error: "Error al añadir el evento a la asignatura" });
-  }
-};
+  };
+  
 // Calcular el promedio del Subject
 export const calculateSubjectAverage = async (subject, res) => {
-  try {
-    if (!subject) {
-      return res.status(404).json({ message: "Asignatura no encontrada" });
+    try {
+      if (!subject) {
+        return res.status(404).json({ message: "Asignatura no encontrada" });
+      }
+  
+      const evaluatedEvents = subject.events.filter((event) => event.type === "evaluado");
+      const totalWeight = evaluatedEvents.reduce((sum, event) => sum + event.weight, 0);
+  
+      const average = totalWeight > 0 
+        ? evaluatedEvents.reduce((sum, event) => sum + (event.grade * event.weight), 0) / totalWeight 
+        : 0;
+  
+      res.status(200).json({
+        message: "Promedio calculado",
+        average,
+      });
+    } catch (error) {
+      res
+        .status(500)
+        .json({ error: "Error al calcular el promedio de la asignatura" });
     }
-    const average = subject.calculateAverage();
-    res.status(200).json({
-      message: "Promedio calculado",
-      average,
-    });
-  } catch (error) {
-    res
-      .status(500)
-      .json({ error: "Error al calcular el promedio de la asignatura" });
-  }
-};
+  };
+  
