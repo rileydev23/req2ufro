@@ -1,4 +1,5 @@
 import User from "../schemas/user.schema.js";
+import Semester from "../schemas/semester.schema.js";
 
 // Registrar un nuevo usuario con Google OAuth
 export const registerUser = async (req, res) => {
@@ -76,34 +77,54 @@ export const deleteUser = async (req, res) => {
   }
 };
 
-// Agregar un semestre a un usuario
+// Agregar un semestre a un usuario y el usuario al semestre
 export const addSemesterToUser = async (req, res) => {
   try {
+    const { id } = req.params; // ID del usuario
+    const { semesterId } = req.body;
+
     const updatedUser = await User.findByIdAndUpdate(
-      req.params.id,
-      { $push: { semesters: req.body.semesterId } },
+      id,
+      { $addToSet: { semesters: semesterId } },
       { new: true }
     );
+
     if (!updatedUser) {
       return res.status(404).json({ message: "Usuario no encontrado" });
     }
+
+    await Semester.findByIdAndUpdate(
+      semesterId,
+      { $addToSet: { users: id } },
+      { new: true }
+    );
+
     res.status(200).json({ message: "Semestre añadido", user: updatedUser });
   } catch (error) {
     res.status(500).json({ error: "Error al añadir el semestre" });
   }
 };
 
-// Eliminar un semestre de un usuario
+// Eliminar un semestre de un usuario y el usuario del semestre
 export const removeSemesterFromUser = async (req, res) => {
   try {
+    const { id, semesterId } = req.params;
+
     const updatedUser = await User.findByIdAndUpdate(
-      req.params.id,
-      { $pull: { semesters: req.body.semesterId } },
+      id,
+      { $pull: { semesters: semesterId } },
       { new: true }
     );
+
     if (!updatedUser) {
       return res.status(404).json({ message: "Usuario no encontrado" });
     }
+    await Semester.findByIdAndUpdate(
+      semesterId,
+      { $pull: { users: id } },
+      { new: true }
+    );
+
     res.status(200).json({ message: "Semestre eliminado", user: updatedUser });
   } catch (error) {
     res.status(500).json({ error: "Error al eliminar el semestre" });

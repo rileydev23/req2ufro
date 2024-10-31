@@ -9,12 +9,14 @@ import {
   removeSemesterFromUser,
   assignRoleToUser,
   getUserSemesters,
-} from '../../controllers/user.controller.js';
-import User from '../../schemas/user.schema.js';
+} from "../../controllers/user.controller.js";
+import User from "../../schemas/user.schema.js";
+import Semester from "../../schemas/semester.schema.js";
 
-jest.mock('../../schemas/user.schema.js');
+jest.mock("../../schemas/user.schema.js");
+jest.mock("../../schemas/semester.schema.js");
 
-describe('Controlador de Usuarios (Unitarias)', () => {
+describe("Controlador de Usuarios (Unitarias)", () => {
   const mockRequest = (body = {}, params = {}) => ({ body, params });
   const mockResponse = () => {
     const res = {};
@@ -26,12 +28,12 @@ describe('Controlador de Usuarios (Unitarias)', () => {
   afterEach(() => jest.clearAllMocks());
 
   // 1. Pruebas para registerUser
-  describe('registerUser', () => {
-    it('debería registrar un usuario exitosamente', async () => {
+  describe("registerUser", () => {
+    it("debería registrar un usuario exitosamente", async () => {
       const req = mockRequest({
-        googleId: '123',
-        email: 'test@test.com',
-        name: 'Test User',
+        googleId: "123",
+        email: "test@test.com",
+        name: "Test User",
       });
       const res = mockResponse();
 
@@ -43,33 +45,33 @@ describe('Controlador de Usuarios (Unitarias)', () => {
 
       expect(res.status).toHaveBeenCalledWith(201);
       expect(res.json).toHaveBeenCalledWith({
-        message: 'Usuario registrado exitosamente',
+        message: "Usuario registrado exitosamente",
       });
     });
 
-    it('debería manejar un error al registrar un usuario', async () => {
-      const req = mockRequest({ googleId: '123' });
+    it("debería manejar un error al registrar un usuario", async () => {
+      const req = mockRequest({ googleId: "123" });
       const res = mockResponse();
 
       User.mockImplementation(() => {
-        throw new Error('Error');
+        throw new Error("Error");
       });
 
       await registerUser(req, res);
 
       expect(res.status).toHaveBeenCalledWith(500);
       expect(res.json).toHaveBeenCalledWith({
-        error: 'Error al registrar el usuario',
+        error: "Error al registrar el usuario",
       });
     });
   });
 
   // 2. Pruebas para loginUser
-  describe('loginUser', () => {
-    it('debería iniciar sesión correctamente', async () => {
-      const req = mockRequest({ googleId: '123' });
+  describe("loginUser", () => {
+    it("debería iniciar sesión correctamente", async () => {
+      const req = mockRequest({ googleId: "123" });
       const res = mockResponse();
-      const user = { googleId: '123', name: 'Test User' };
+      const user = { googleId: "123", name: "Test User" };
 
       User.findOne.mockResolvedValue(user);
 
@@ -77,13 +79,13 @@ describe('Controlador de Usuarios (Unitarias)', () => {
 
       expect(res.status).toHaveBeenCalledWith(200);
       expect(res.json).toHaveBeenCalledWith({
-        message: 'Inicio de sesión exitoso',
+        message: "Inicio de sesión exitoso",
         user,
       });
     });
 
-    it('debería devolver 404 si el usuario no existe', async () => {
-      const req = mockRequest({ googleId: '123' });
+    it("debería devolver 404 si el usuario no existe", async () => {
+      const req = mockRequest({ googleId: "123" });
       const res = mockResponse();
 
       User.findOne.mockResolvedValue(null);
@@ -92,17 +94,17 @@ describe('Controlador de Usuarios (Unitarias)', () => {
 
       expect(res.status).toHaveBeenCalledWith(404);
       expect(res.json).toHaveBeenCalledWith({
-        message: 'Usuario no encontrado',
+        message: "Usuario no encontrado",
       });
     });
   });
 
   // 3. Pruebas para getUserById
-  describe('getUserById', () => {
-    it('debería obtener un usuario por ID', async () => {
-      const req = mockRequest({}, { id: '123' });
+  describe("getUserById", () => {
+    it("debería obtener un usuario por ID", async () => {
+      const req = mockRequest({}, { id: "123" });
       const res = mockResponse();
-      const user = { _id: '123', name: 'Test User' };
+      const user = { _id: "123", name: "Test User" };
 
       User.findById.mockResolvedValue(user);
 
@@ -112,8 +114,8 @@ describe('Controlador de Usuarios (Unitarias)', () => {
       expect(res.json).toHaveBeenCalledWith(user);
     });
 
-    it('debería devolver 404 si el usuario no existe', async () => {
-      const req = mockRequest({}, { id: '123' });
+    it("debería devolver 404 si el usuario no existe", async () => {
+      const req = mockRequest({}, { id: "123" });
       const res = mockResponse();
 
       User.findById.mockResolvedValue(null);
@@ -122,17 +124,17 @@ describe('Controlador de Usuarios (Unitarias)', () => {
 
       expect(res.status).toHaveBeenCalledWith(404);
       expect(res.json).toHaveBeenCalledWith({
-        message: 'Usuario no encontrado',
+        message: "Usuario no encontrado",
       });
     });
   });
 
   // 4. Pruebas para getAllUsers
-  describe('getAllUsers', () => {
-    it('debería obtener todos los usuarios', async () => {
+  describe("getAllUsers", () => {
+    it("debería obtener todos los usuarios", async () => {
       const req = mockRequest();
       const res = mockResponse();
-      const users = [{ _id: '123', name: 'Test User' }];
+      const users = [{ _id: "123", name: "Test User" }];
 
       User.find.mockResolvedValue(users);
 
@@ -144,11 +146,11 @@ describe('Controlador de Usuarios (Unitarias)', () => {
   });
 
   // 5. Pruebas para updateUser
-  describe('updateUser', () => {
-    it('debería actualizar un usuario correctamente', async () => {
-      const req = mockRequest({ name: 'Updated User' }, { id: '123' });
+  describe("updateUser", () => {
+    it("debería actualizar un usuario correctamente", async () => {
+      const req = mockRequest({ name: "Updated User" }, { id: "123" });
       const res = mockResponse();
-      const updatedUser = { _id: '123', name: 'Updated User' };
+      const updatedUser = { _id: "123", name: "Updated User" };
 
       User.findByIdAndUpdate.mockResolvedValue(updatedUser);
 
@@ -156,71 +158,97 @@ describe('Controlador de Usuarios (Unitarias)', () => {
 
       expect(res.status).toHaveBeenCalledWith(200);
       expect(res.json).toHaveBeenCalledWith({
-        message: 'Usuario actualizado',
+        message: "Usuario actualizado",
         user: updatedUser,
       });
     });
   });
 
   // 6. Pruebas para deleteUser
-  describe('deleteUser', () => {
-    it('debería eliminar un usuario correctamente', async () => {
-      const req = mockRequest({}, { id: '123' });
+  describe("deleteUser", () => {
+    it("debería eliminar un usuario correctamente", async () => {
+      const req = mockRequest({}, { id: "123" });
       const res = mockResponse();
 
-      User.findByIdAndDelete.mockResolvedValue({ _id: '123' });
+      User.findByIdAndDelete.mockResolvedValue({ _id: "123" });
 
       await deleteUser(req, res);
 
       expect(res.status).toHaveBeenCalledWith(200);
-      expect(res.json).toHaveBeenCalledWith({ message: 'Usuario eliminado' });
+      expect(res.json).toHaveBeenCalledWith({ message: "Usuario eliminado" });
     });
   });
 
   // 7. Pruebas para addSemesterToUser
-  describe('addSemesterToUser', () => {
-    it('debería añadir un semestre al usuario', async () => {
-      const req = mockRequest({ semesterId: '456' }, { id: '123' });
+  describe("addSemesterToUser", () => {
+    it("debería añadir un semestre al usuario y actualizar el semestre con el usuario", async () => {
+      const req = mockRequest({ semesterId: "456" }, { id: "123" });
       const res = mockResponse();
-      const updatedUser = { _id: '123', semesters: ['456'] };
+
+      const updatedUser = { _id: "123", semesters: ["456"] };
+      const updatedSemester = { _id: "456", users: ["123"] };
 
       User.findByIdAndUpdate.mockResolvedValue(updatedUser);
+      Semester.findByIdAndUpdate.mockResolvedValue(updatedSemester);
 
       await addSemesterToUser(req, res);
 
+      expect(User.findByIdAndUpdate).toHaveBeenCalledWith(
+        "123",
+        { $addToSet: { semesters: "456" } },
+        { new: true }
+      );
+      expect(Semester.findByIdAndUpdate).toHaveBeenCalledWith(
+        "456",
+        { $addToSet: { users: "123" } },
+        { new: true }
+      );
       expect(res.status).toHaveBeenCalledWith(200);
       expect(res.json).toHaveBeenCalledWith({
-        message: 'Semestre añadido',
+        message: "Semestre añadido",
         user: updatedUser,
       });
     });
   });
 
-  // 8. Pruebas para removeSemesterFromUser
-  describe('removeSemesterFromUser', () => {
-    it('debería eliminar un semestre de un usuario', async () => {
-      const req = mockRequest({ semesterId: '456' }, { id: '123' });
+  // 8. Prueba para removeSemesterFromUser
+  describe("removeSemesterFromUser", () => {
+    it("debería eliminar un semestre de un usuario y actualizar el semestre eliminando al usuario", async () => {
+      const req = mockRequest({}, { id: "123", semesterId: "456"});
       const res = mockResponse();
-      const updatedUser = { _id: '123', semesters: [] };
+
+      const updatedUser = { _id: "123", semesters: [] };
+      const updatedSemester = { _id: "456", users: [] };
 
       User.findByIdAndUpdate.mockResolvedValue(updatedUser);
+      Semester.findByIdAndUpdate.mockResolvedValue(updatedSemester);
 
       await removeSemesterFromUser(req, res);
 
+      expect(User.findByIdAndUpdate).toHaveBeenCalledWith(
+        "123",
+        { $pull: { semesters: "456" } },
+        { new: true }
+      );
+      expect(Semester.findByIdAndUpdate).toHaveBeenCalledWith(
+        "456",
+        { $pull: { users: "123" } },
+        { new: true }
+      );
       expect(res.status).toHaveBeenCalledWith(200);
       expect(res.json).toHaveBeenCalledWith({
-        message: 'Semestre eliminado',
+        message: "Semestre eliminado",
         user: updatedUser,
       });
     });
   });
 
   // 9. Pruebas para assignRoleToUser
-  describe('assignRoleToUser', () => {
-    it('debería asignar un rol a un usuario', async () => {
-      const req = mockRequest({ role: 'admin' }, { id: '123' });
+  describe("assignRoleToUser", () => {
+    it("debería asignar un rol a un usuario", async () => {
+      const req = mockRequest({ role: "admin" }, { id: "123" });
       const res = mockResponse();
-      const updatedUser = { _id: '123', role: 'admin' };
+      const updatedUser = { _id: "123", role: "admin" };
 
       User.findByIdAndUpdate.mockResolvedValue(updatedUser);
 
@@ -228,18 +256,18 @@ describe('Controlador de Usuarios (Unitarias)', () => {
 
       expect(res.status).toHaveBeenCalledWith(200);
       expect(res.json).toHaveBeenCalledWith({
-        message: 'Rol asignado',
+        message: "Rol asignado",
         user: updatedUser,
       });
     });
   });
 
   // 10. Pruebas para getUserSemesters
-  describe('getUserSemesters', () => {
-    it('debería obtener los semestres del usuario', async () => {
-      const req = mockRequest({}, { id: '123' });
+  describe("getUserSemesters", () => {
+    it("debería obtener los semestres del usuario", async () => {
+      const req = mockRequest({}, { id: "123" });
       const res = mockResponse();
-      const user = { _id: '123', semesters: ['456'] };
+      const user = { _id: "123", semesters: ["456"] };
 
       User.findById.mockResolvedValue(user); // Verifica que este mock tenga la estructura correcta
 
