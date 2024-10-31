@@ -9,9 +9,11 @@ import {
 } from '../../controllers/subject.controller.js';
 import Subject from '../../schemas/subject.schema.js';
 import Event from '../../schemas/event.schema.js';
+import Semester from '../../schemas/semester.schema.js';
 
 jest.mock('../../schemas/subject.schema.js');
 jest.mock('../../schemas/event.schema.js');
+jest.mock('../../schemas/semester.schema.js');
 
 describe('Controlador de Asignaturas (Subjects)', () => {
   const mockRequest = (body = {}, params = {}) => ({ body, params });
@@ -26,22 +28,34 @@ describe('Controlador de Asignaturas (Subjects)', () => {
 
   // 1. Crear Asignatura
   describe('createSubject', () => {
-    it('debería crear una asignatura exitosamente', async () => {
-      const req = mockRequest({ name: 'Matemáticas' });
-      const res = mockResponse();
-
-      Subject.mockImplementation(() => ({
-        save: jest.fn().mockResolvedValue(req.body),
-      }));
-
-      await createSubject(req, res);
-
-      expect(res.status).toHaveBeenCalledWith(201);
-      expect(res.json).toHaveBeenCalledWith({
-        message: 'Asignatura creada exitosamente',
-        subject: req.body,
+    it('debería crear una asignatura exitosamente y asignarla al semestre', async () => {
+        const req = mockRequest({ name: 'Matemáticas' }, { semesterId: 'sem123' });
+        const res = mockResponse();
+    
+        // Mock de Subject
+        const newSubject = { _id: 'subjectId', name: 'Matemáticas' };
+        Subject.mockImplementation(() => ({
+          save: jest.fn().mockResolvedValue(newSubject),
+        }));
+    
+        // Mock de Semester
+        Semester.findByIdAndUpdate.mockResolvedValue({
+          subjects: ['subjectId'],
+        });
+    
+        await createSubject(req, res);
+    
+        expect(res.status).toHaveBeenCalledWith(201);
+        expect(res.json).toHaveBeenCalledWith({
+          message: 'Asignatura creada exitosamente',
+          subject: newSubject,
+        });
+        expect(Semester.findByIdAndUpdate).toHaveBeenCalledWith(
+          req.params.semesterId,
+          { $push: { subjects: newSubject._id } }, 
+          { new: true }
+        );
       });
-    });
 
     it('debería devolver un error al crear la asignatura', async () => {
       const req = mockRequest({ name: 'Matemáticas' });
@@ -127,19 +141,28 @@ describe('Controlador de Asignaturas (Subjects)', () => {
 
   // 5. Eliminar Asignatura
   describe('deleteSubject', () => {
-    it('debería eliminar una asignatura', async () => {
-      const req = mockRequest({}, { id: '123' });
-      const res = mockResponse();
-
-      Subject.findByIdAndDelete.mockResolvedValue(true);
-
-      await deleteSubject(req, res);
-
-      expect(res.status).toHaveBeenCalledWith(200);
-      expect(res.json).toHaveBeenCalledWith({
-        message: 'Asignatura eliminada',
+    it('debería eliminar una asignatura y actualizar el semestre', async () => {
+        const req = mockRequest({}, { id: '123', semesterId: 'sem123' });
+        const res = mockResponse();
+    
+        Subject.findByIdAndDelete.mockResolvedValue(true);
+        Semester.findByIdAndUpdate.mockResolvedValue({
+          subjects: [],
+        });
+    
+        await deleteSubject(req, res);
+    
+        expect(res.status).toHaveBeenCalledWith(200);
+        expect(res.json).toHaveBeenCalledWith({
+          message: 'Asignatura eliminada y actualizada en el semestre',
+          semester: { subjects: [] }, 
+        });
+        expect(Semester.findByIdAndUpdate).toHaveBeenCalledWith(
+          req.params.semesterId,
+          { $pull: { subjects: req.params.id } },
+          { new: true }
+        );
       });
-    });
 
     it('debería devolver 404 si la asignatura no existe', async () => {
       const req = mockRequest({}, { id: '123' });

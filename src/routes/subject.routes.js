@@ -11,11 +11,11 @@ import {
 
 const router = express.Router();
 
-router.post('/', createSubject);
+router.post('/:semesterId', createSubject);
 router.get('/:id', getSubjectById);
 router.get('/', getAllSubjects);
 router.put('/:id', updateSubject);
-router.delete('/:id', deleteSubject);
+router.delete('/:id/semester/:semesterId', deleteSubject);
 router.post('/:id/event', addEventToSubject);
 router.get('/:id/average', calculateSubjectAverage);
 

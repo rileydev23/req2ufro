@@ -1,11 +1,24 @@
 import Subject from "../schemas/subject.schema.js";
 import Event from "../schemas/event.schema.js";
+import Semester from "../schemas/semester.schema.js";
 
 // Crear un nuevo Subject
 export const createSubject = async (req, res) => {
   try {
+    const semesterId = req.params.semesterId;
     const newSubject = new Subject(req.body);
     const savedSubject = await newSubject.save();
+
+    const updatedSemester = await Semester.findByIdAndUpdate(
+        semesterId,
+        { $push: { subjects: savedSubject._id } },
+        { new: true }
+        );
+
+    if (!updatedSemester) {
+        return res.status(404).json({ message: "Semestre no encontrado" });
+    }
+
     res.status(201).json({
       message: "Asignatura creada exitosamente",
       subject: savedSubject,
@@ -60,15 +73,32 @@ export const updateSubject = async (req, res) => {
 
 // Eliminar Subject por ID
 export const deleteSubject = async (req, res) => {
-  try {
-    const deletedSubject = await Subject.findByIdAndDelete(req.params.id);
-    if (!deletedSubject) {
-      return res.status(404).json({ message: "Asignatura no encontrada" });
+    try {
+      const { id, semesterId } = req.params;
+  
+      const deletedSubject = await Subject.findByIdAndDelete(id);
+      if (!deletedSubject) {
+        return res.status(404).json({ message: "Asignatura no encontrada" });
+      }
+  
+      // Actualizar el Semester eliminando la referencia al Subject
+      const updatedSemester = await Semester.findByIdAndUpdate(
+        semesterId,
+        { $pull: { subjects: id } }, // Remueve el ID del subject eliminado del array de subjects
+        { new: true }
+      );
+  
+      if (!updatedSemester) {
+        return res.status(404).json({ message: "Semestre no encontrado" });
+      }
+  
+      res.status(200).json({
+        message: "Asignatura eliminada y actualizada en el semestre",
+        semester: updatedSemester,
+      });
+    } catch (error) {
+      res.status(500).json({ error: "Error al eliminar la asignatura o actualizar el semestre" });
     }
-    res.status(200).json({ message: "Asignatura eliminada" });
-  } catch (error) {
-    res.status(500).json({ error: "Error al eliminar la asignatura" });
-  }
 };
 
 // Agregar un evento al Subject
