@@ -1,9 +1,7 @@
 import mongoose from 'mongoose';
-import EventSchema from './event.schema.js';
 
 const SubjectSchema = new mongoose.Schema({
   name: { type: String, required: true }, 
-  grades: [Number], // Notas de la asignatura
   events: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Event' }], // Referencia a los eventos
   average: { type: Number, default: 0 }, // Promedio calculado de la asignatura
 });

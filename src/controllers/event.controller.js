@@ -74,6 +74,9 @@ export const deleteEvent = async (req, res) => {
   }
 };
 
+
+
+// Corregir
 export const isEvaluatedEvent = (event) => {
   return event.type === "evaluado";
 };

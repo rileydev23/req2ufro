@@ -25,7 +25,7 @@ describe('Controlador de Asignaturas (Subjects)', () => {
   // 1. Crear Asignatura
   describe('createSubject', () => {
     it('debería crear una asignatura exitosamente', async () => {
-      const req = mockRequest({ name: 'Matemáticas', grades: [] });
+      const req = mockRequest({ name: 'Matemáticas'});
       const res = mockResponse();
 
       Subject.mockImplementation(() => ({
