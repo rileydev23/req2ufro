@@ -74,15 +74,20 @@ export const deleteEvent = async (req, res) => {
   }
 };
 
-
-
-// Corregir
-export const isEvaluatedEvent = (event) => {
-  return event.type === "evaluado";
-};
-
-export const calculateEventWeight = (events) => {
-  return events
-    .filter((event) => event.type === "evaluado")
-    .reduce((total, event) => total + (event.weight || 0), 0);
-};
+export const isEvaluatedEvent = async (req, res) => {
+    try {
+      const { id } = req.params;
+      const event = await Event.findById(id);
+      if (!event) {
+        return res.status(404).json({ message: "Evento no encontrado" });
+      }
+  
+      const isEvaluated = event.type === "evaluado";
+      res.status(200).json({
+        message: "Evaluación del tipo de evento",
+        isEvaluated,
+      });
+    } catch (error) {
+      res.status(500).json({ error: "Error al verificar el tipo de evento" });
+    }
+  };

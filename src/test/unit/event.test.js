@@ -148,32 +148,63 @@ import {
   
     // 6. Verificar si el Evento es Evaluado
     describe('isEvaluatedEvent', () => {
-      it('debería devolver true para un evento evaluado', () => {
-        const event = { type: 'evaluado' };
-  
-        const result = isEvaluatedEvent(event);
-        expect(result).toBe(true);
+        it('debería devolver true para un evento evaluado', async () => {
+          // Mock de req y res
+          const req = { params: { id: 'evento123' } };
+          const res = {
+            status: jest.fn().mockReturnThis(),
+            json: jest.fn(),
+          };
+      
+          // Simulamos que el evento es de tipo "evaluado"
+          const mockEvent = { _id: 'evento123', type: 'evaluado' };
+          Event.findById.mockResolvedValue(mockEvent);
+      
+          await isEvaluatedEvent(req, res);
+      
+          expect(Event.findById).toHaveBeenCalledWith('evento123');
+          expect(res.status).toHaveBeenCalledWith(200);
+          expect(res.json).toHaveBeenCalledWith({
+            message: 'Evaluación del tipo de evento',
+            isEvaluated: true,
+          });
+        });
+      
+        it('debería devolver false para un evento no evaluado', async () => {
+          const req = { params: { id: 'evento456' } };
+          const res = {
+            status: jest.fn().mockReturnThis(),
+            json: jest.fn(),
+          };
+      
+          const mockEvent = { _id: 'evento456', type: 'no_evaluado' };
+          Event.findById.mockResolvedValue(mockEvent);
+      
+          await isEvaluatedEvent(req, res);
+      
+          expect(Event.findById).toHaveBeenCalledWith('evento456');
+          expect(res.status).toHaveBeenCalledWith(200);
+          expect(res.json).toHaveBeenCalledWith({
+            message: 'Evaluación del tipo de evento',
+            isEvaluated: false,
+          });
+        });
+      
+        it('debería devolver 404 si el evento no existe', async () => {
+          const req = { params: { id: 'evento789' } };
+          const res = {
+            status: jest.fn().mockReturnThis(),
+            json: jest.fn(),
+          };
+      
+          Event.findById.mockResolvedValue(null);
+          await isEvaluatedEvent(req, res);    
+          expect(Event.findById).toHaveBeenCalledWith('evento789');
+          expect(res.status).toHaveBeenCalledWith(404);
+          expect(res.json).toHaveBeenCalledWith({
+            message: 'Evento no encontrado',
+          });
+        });
       });
-  
-      it('debería devolver false para un evento no evaluado', () => {
-        const event = { type: 'recordatorio' };
-  
-        const result = isEvaluatedEvent(event);
-        expect(result).toBe(false);
-      });
-    });
-  
-    // 7. Calcular Peso Total de Eventos Evaluados
-    describe('calculateEventWeight', () => {
-      it('debería calcular correctamente el peso total de los eventos', () => {
-        const events = [
-          { type: 'evaluado', weight: 50 },
-          { type: 'evaluado', weight: 30 },
-        ];
-  
-        const totalWeight = calculateEventWeight(events);
-        expect(totalWeight).toBe(80);
-      });
-    });
   });
   

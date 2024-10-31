@@ -8,8 +8,10 @@ import {
   calculateSubjectAverage,
 } from '../../controllers/subject.controller.js';
 import Subject from '../../schemas/subject.schema.js';
+import Event from '../../schemas/event.schema.js';
 
 jest.mock('../../schemas/subject.schema.js');
+jest.mock('../../schemas/event.schema.js');
 
 describe('Controlador de Asignaturas (Subjects)', () => {
   const mockRequest = (body = {}, params = {}) => ({ body, params });
@@ -25,7 +27,7 @@ describe('Controlador de Asignaturas (Subjects)', () => {
   // 1. Crear Asignatura
   describe('createSubject', () => {
     it('debería crear una asignatura exitosamente', async () => {
-      const req = mockRequest({ name: 'Matemáticas'});
+      const req = mockRequest({ name: 'Matemáticas' });
       const res = mockResponse();
 
       Subject.mockImplementation(() => ({
@@ -183,11 +185,16 @@ describe('Controlador de Asignaturas (Subjects)', () => {
   describe('calculateSubjectAverage', () => {
     it('debería calcular el promedio ponderado correctamente y devolverlo en la respuesta', async () => {
       const subject = {
-        events: [
-          { type: 'evaluado', grade: 90, weight: 50 },
-          { type: 'evaluado', grade: 80, weight: 50 },
-        ],
+        _id: 'subjectId',
+        events: ['eventId1', 'eventId2'],
       };
+
+      Subject.findById.mockResolvedValue(subject);
+
+      Event.find.mockResolvedValue([
+        { type: 'evaluado', grade: 90, weight: 50 },
+        { type: 'evaluado', grade: 80, weight: 50 },
+      ]);
 
       const mockResponse = () => {
         const res = {};
@@ -195,8 +202,11 @@ describe('Controlador de Asignaturas (Subjects)', () => {
         res.json = jest.fn();
         return res;
       };
+
+      const req = { params: { id: 'subjectId' } };
       const res = mockResponse();
-      await calculateSubjectAverage(subject, res);
+
+      await calculateSubjectAverage(req, res);
 
       expect(res.status).toHaveBeenCalledWith(200);
       expect(res.json).toHaveBeenCalledWith({
@@ -206,15 +216,19 @@ describe('Controlador de Asignaturas (Subjects)', () => {
     });
 
     it('debería devolver 404 si no se proporciona la asignatura', async () => {
+      Subject.findById.mockResolvedValue(null);
+
       const mockResponse = () => {
         const res = {};
         res.status = jest.fn().mockReturnThis();
         res.json = jest.fn();
         return res;
       };
+
+      const req = { params: { id: 'subjectId' } };
       const res = mockResponse();
 
-      await calculateSubjectAverage(null, res);
+      await calculateSubjectAverage(req, res);
 
       expect(res.status).toHaveBeenCalledWith(404);
       expect(res.json).toHaveBeenCalledWith({

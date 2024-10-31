@@ -1,4 +1,5 @@
 import Subject from "../schemas/subject.schema.js";
+import Event from "../schemas/event.schema.js";
 
 // Crear un nuevo Subject
 export const createSubject = async (req, res) => {
@@ -93,27 +94,33 @@ export const addEventToSubject = async (req, res) => {
   };
   
 // Calcular el promedio del Subject
-export const calculateSubjectAverage = async (subject, res) => {
-    try {
-      if (!subject) {
-        return res.status(404).json({ message: "Asignatura no encontrada" });
-      }
-  
-      const evaluatedEvents = subject.events.filter((event) => event.type === "evaluado");
-      const totalWeight = evaluatedEvents.reduce((sum, event) => sum + event.weight, 0);
-  
-      const average = totalWeight > 0 
-        ? evaluatedEvents.reduce((sum, event) => sum + (event.grade * event.weight), 0) / totalWeight 
-        : 0;
-  
-      res.status(200).json({
-        message: "Promedio calculado",
-        average,
-      });
-    } catch (error) {
-      res
-        .status(500)
-        .json({ error: "Error al calcular el promedio de la asignatura" });
+export const calculateSubjectAverage = async (req, res) => {
+  try {
+    const id = req.params.id;
+    
+    const subject = await Subject.findById(id);
+    if (!subject) {
+      return res.status(404).json({ message: "Asignatura no encontrada" });
     }
-  };
+
+    const events = await Event.find({ 
+      _id: { $in: subject.events },
+      type: 'evaluado',
+      grade: { $exists: true }
+    });
+
+    const totalWeight = events.reduce((sum, event) => sum + event.weight, 0);
+    const average = totalWeight > 0 
+      ? events.reduce((sum, event) => sum + (event.grade * event.weight / 100), 0)
+      : 0;
+
+    res.status(200).json({
+      message: "Promedio calculado",
+      average,
+    });
+  } catch (error) {
+    res.status(500).json({ error: "Error al calcular el promedio de la asignatura" });
+  }
+};
+
   

@@ -6,7 +6,6 @@ import {
   updateEvent,
   deleteEvent,
   isEvaluatedEvent,
-  calculateEventWeight,
 } from '../controllers/event.controller.js';
 
 const router = express.Router();
@@ -17,6 +16,5 @@ router.get('/', getAllEvents);
 router.put('/:id', updateEvent);
 router.delete('/:id', deleteEvent);
 router.get('/:id/is-evaluated', isEvaluatedEvent);
-router.get('/calculate-weight', calculateEventWeight);
 
 export default router;
