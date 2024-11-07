@@ -1,3 +1,4 @@
+import connectDB from '../../config/mongo.js';
 import request from 'supertest';
 import mongoose from 'mongoose';
 import { expect } from 'chai';
@@ -5,10 +6,12 @@ import app from '../../app.js';
 import Semester from '../../schemas/semester.schema.js';
 
 before(async () => {
-  await mongoose.connect(process.env.MONGO_URI);
-  console.log('Base de datos conectada');
-});
-
+    const isConnected = await connectDB();
+    if (!isConnected) {
+      throw new Error('No se pudo conectar a la base de datos');
+    }
+    console.log('Base de datos conectada');
+  });
 after(async () => {
   await mongoose.connection.close();
   console.log('Conexión cerrada');

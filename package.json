@@ -9,8 +9,7 @@
     "test:integration": "mocha 'src/test/integration/*.test.js' --timeout 10000 --exit",
     "test:regresion": "mocha 'src/test/regresion/*.test.js' --timeout 10000 --exit",
     "test:unit": "jest --roots src/test/unit",
-    "test:coverage": "jest --coverage --watchAll",
-    "test:coverage:unit": "jest --coverage --watchAll src/test/unit"
+    "test:coverage:unit": "jest --coverage src/test/unit"
   },
   "type": "module",
   "jest": {
@@ -27,6 +26,7 @@
     "express": "^4.21.1",
     "mongoose": "^8.7.1",
     "nodemon": "^3.1.7",
+    "nyc": "^17.1.0",
     "re2ufrojs": "file:"
   },
   "devDependencies": {
