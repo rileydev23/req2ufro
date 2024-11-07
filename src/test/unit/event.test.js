@@ -4,8 +4,7 @@ import {
     getAllEvents,
     updateEvent,
     deleteEvent,
-    isEvaluatedEvent,
-    calculateEventWeight,
+    isEvaluatedEvent
   } from '../../controllers/event.controller.js';
   import Event from '../../schemas/event.schema.js';
   

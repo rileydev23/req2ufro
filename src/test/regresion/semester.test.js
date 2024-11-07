@@ -6,7 +6,6 @@ import { expect } from 'chai';
 
 let createdSemesterId;
 
-// Conectar a la base de datos antes de todas las pruebas
 before(async () => {
   const isConnected = await connectDB();
   if (!isConnected) {
@@ -15,7 +14,6 @@ before(async () => {
   console.log('Base de datos conectada');
 });
 
-// Cerrar la conexión a la base de datos después de todas las pruebas
 after(async () => {
   await mongoose.connection.close();
   console.log('Conexión cerrada');
