@@ -1,4 +1,5 @@
-# compiled output
+.env
+coverage# compiled output
 /dist
 /node_modules
 
