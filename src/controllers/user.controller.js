@@ -156,8 +156,22 @@ export const getUserSemesters = async (req, res) => {
     if (!user) {
       return res.status(404).json({ error: "Usuario no encontrado" });
     }
+    // remove users, owner from semester
+    const semesters = await Semester.find({
+      _id: { $in: user.semesters },
+    })
+      .select("-users -owner -__v")
+      .populate("subjects", "-semester -__v");
 
-    res.status(200).json(user.semesters);
+    // add current week for each semester calculated from startDate
+    const updatedSemesters = semesters.map((semester) => {
+      const currentWeek = Math.ceil(
+        (Date.now() - new Date(semester.startDate)) / (1000 * 60 * 60 * 24 * 7)
+      );
+      return { ...semester._doc, currentWeek };
+    });
+
+    res.status(200).json(updatedSemesters);
   } catch (error) {
     console.error("Error en getUserSemesters:", error);
     res
