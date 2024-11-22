@@ -7,19 +7,19 @@ import {
     isEvaluatedEvent
   } from '../../controllers/event.controller.js';
   import Event from '../../schemas/event.schema.js';
-  
-  jest.mock('../../schemas/event.schema.js');
+  import { expect } from 'chai';
+  import sinon from 'sinon';
   
   describe('Controlador de Eventos (Events)', () => {
     const mockRequest = (body = {}, params = {}) => ({ body, params });
     const mockResponse = () => {
       const res = {};
-      res.status = jest.fn().mockReturnThis();
-      res.json = jest.fn().mockReturnThis();
+      res.status = sinon.stub().returns(res);
+      res.json = sinon.stub().returns(res);
       return res;
     };
   
-    afterEach(() => jest.clearAllMocks());
+    afterEach(() => sinon.restore());
   
     // 1. Crear Evento
     describe('createEvent', () => {
@@ -27,31 +27,27 @@ import {
         const req = mockRequest({ title: 'Examen Final', type: 'evaluado', weight: 50, date: '2024-07-01' });
         const res = mockResponse();
   
-        Event.mockImplementation(() => ({
-          save: jest.fn().mockResolvedValue(req.body),
-        }));
+        sinon.stub(Event.prototype, 'save').resolves(req.body);
   
         await createEvent(req, res);
   
-        expect(res.status).toHaveBeenCalledWith(201);
-        expect(res.json).toHaveBeenCalledWith({
+        expect(res.status.calledWith(201)).to.be.true;
+        expect(res.json.calledWith({
           message: 'Evento creado exitosamente',
           event: req.body,
-        });
+        })).to.be.true;
       });
   
       it('debería devolver un error al crear el evento', async () => {
         const req = mockRequest({ title: 'Examen Final' });
         const res = mockResponse();
   
-        Event.mockImplementation(() => {
-          throw new Error('Error');
-        });
+        sinon.stub(Event.prototype, 'save').throws(new Error('Error'));
   
         await createEvent(req, res);
   
-        expect(res.status).toHaveBeenCalledWith(500);
-        expect(res.json).toHaveBeenCalledWith({ error: 'Error al crear el evento' });
+        expect(res.status.calledWith(500)).to.be.true;
+        expect(res.json.calledWith({ error: 'Error al crear el evento' })).to.be.true;
       });
     });
   
@@ -62,24 +58,24 @@ import {
         const res = mockResponse();
         const eventData = { _id: '123', title: 'Examen Final', type: 'evaluado' };
   
-        Event.findById.mockResolvedValue(eventData);
+        sinon.stub(Event, 'findById').resolves(eventData);
   
         await getEventById(req, res);
   
-        expect(res.status).toHaveBeenCalledWith(200);
-        expect(res.json).toHaveBeenCalledWith(eventData);
+        expect(res.status.calledWith(200)).to.be.true;
+        expect(res.json.calledWith(eventData)).to.be.true;
       });
   
       it('debería devolver 404 si el evento no existe', async () => {
         const req = mockRequest({}, { id: '123' });
         const res = mockResponse();
   
-        Event.findById.mockResolvedValue(null);
+        sinon.stub(Event, 'findById').resolves(null);
   
         await getEventById(req, res);
   
-        expect(res.status).toHaveBeenCalledWith(404);
-        expect(res.json).toHaveBeenCalledWith({ message: 'Evento no encontrado' });
+        expect(res.status.calledWith(404)).to.be.true;
+        expect(res.json.calledWith({ message: 'Evento no encontrado' })).to.be.true;
       });
     });
   
@@ -90,12 +86,12 @@ import {
         const res = mockResponse();
         const events = [{ _id: '123', title: 'Examen Final' }];
   
-        Event.find.mockResolvedValue(events);
+        sinon.stub(Event, 'find').resolves(events);
   
         await getAllEvents(req, res);
   
-        expect(res.status).toHaveBeenCalledWith(200);
-        expect(res.json).toHaveBeenCalledWith(events);
+        expect(res.status.calledWith(200)).to.be.true;
+        expect(res.json.calledWith(events)).to.be.true;
       });
     });
   
@@ -106,15 +102,15 @@ import {
         const res = mockResponse();
         const updatedEvent = { _id: '123', title: 'Examen Actualizado' };
   
-        Event.findByIdAndUpdate.mockResolvedValue(updatedEvent);
+        sinon.stub(Event, 'findByIdAndUpdate').resolves(updatedEvent);
   
         await updateEvent(req, res);
   
-        expect(res.status).toHaveBeenCalledWith(200);
-        expect(res.json).toHaveBeenCalledWith({
+        expect(res.status.calledWith(200)).to.be.true;
+        expect(res.json.calledWith({
           message: 'Evento actualizado',
           event: updatedEvent,
-        });
+        })).to.be.true;
       });
     });
   
@@ -124,86 +120,75 @@ import {
         const req = mockRequest({}, { id: '123' });
         const res = mockResponse();
   
-        Event.findByIdAndDelete.mockResolvedValue(true);
+        sinon.stub(Event, 'findByIdAndDelete').resolves(true);
   
         await deleteEvent(req, res);
   
-        expect(res.status).toHaveBeenCalledWith(200);
-        expect(res.json).toHaveBeenCalledWith({ message: 'Evento eliminado' });
+        expect(res.status.calledWith(200)).to.be.true;
+        expect(res.json.calledWith({ message: 'Evento eliminado' })).to.be.true;
       });
   
       it('debería devolver 404 si el evento no existe', async () => {
         const req = mockRequest({}, { id: '123' });
         const res = mockResponse();
   
-        Event.findByIdAndDelete.mockResolvedValue(null);
+        sinon.stub(Event, 'findByIdAndDelete').resolves(null);
   
         await deleteEvent(req, res);
   
-        expect(res.status).toHaveBeenCalledWith(404);
-        expect(res.json).toHaveBeenCalledWith({ message: 'Evento no encontrado' });
+        expect(res.status.calledWith(404)).to.be.true;
+        expect(res.json.calledWith({ message: 'Evento no encontrado' })).to.be.true;
       });
     });
   
     // 6. Verificar si el Evento es Evaluado
     describe('isEvaluatedEvent', () => {
-        it('debería devolver true para un evento evaluado', async () => {
-          // Mock de req y res
-          const req = { params: { id: 'evento123' } };
-          const res = {
-            status: jest.fn().mockReturnThis(),
-            json: jest.fn(),
-          };
-      
-          // Simulamos que el evento es de tipo "evaluado"
-          const mockEvent = { _id: 'evento123', type: 'evaluado' };
-          Event.findById.mockResolvedValue(mockEvent);
-      
-          await isEvaluatedEvent(req, res);
-      
-          expect(Event.findById).toHaveBeenCalledWith('evento123');
-          expect(res.status).toHaveBeenCalledWith(200);
-          expect(res.json).toHaveBeenCalledWith({
-            message: 'Evaluación del tipo de evento',
-            isEvaluated: true,
-          });
-        });
-      
-        it('debería devolver false para un evento no evaluado', async () => {
-          const req = { params: { id: 'evento456' } };
-          const res = {
-            status: jest.fn().mockReturnThis(),
-            json: jest.fn(),
-          };
-      
-          const mockEvent = { _id: 'evento456', type: 'no_evaluado' };
-          Event.findById.mockResolvedValue(mockEvent);
-      
-          await isEvaluatedEvent(req, res);
-      
-          expect(Event.findById).toHaveBeenCalledWith('evento456');
-          expect(res.status).toHaveBeenCalledWith(200);
-          expect(res.json).toHaveBeenCalledWith({
-            message: 'Evaluación del tipo de evento',
-            isEvaluated: false,
-          });
-        });
-      
-        it('debería devolver 404 si el evento no existe', async () => {
-          const req = { params: { id: 'evento789' } };
-          const res = {
-            status: jest.fn().mockReturnThis(),
-            json: jest.fn(),
-          };
-      
-          Event.findById.mockResolvedValue(null);
-          await isEvaluatedEvent(req, res);    
-          expect(Event.findById).toHaveBeenCalledWith('evento789');
-          expect(res.status).toHaveBeenCalledWith(404);
-          expect(res.json).toHaveBeenCalledWith({
-            message: 'Evento no encontrado',
-          });
-        });
+      it('debería devolver true para un evento evaluado', async () => {
+        const req = { params: { id: 'evento123' } };
+        const res = mockResponse();
+  
+        const mockEvent = { _id: 'evento123', type: 'evaluado' };
+        sinon.stub(Event, 'findById').resolves(mockEvent);
+  
+        await isEvaluatedEvent(req, res);
+  
+        expect(Event.findById.calledWith('evento123')).to.be.true;
+        expect(res.status.calledWith(200)).to.be.true;
+        expect(res.json.calledWith({
+          message: 'Evaluación del tipo de evento',
+          isEvaluated: true,
+        })).to.be.true;
       });
+  
+      it('debería devolver false para un evento no evaluado', async () => {
+        const req = { params: { id: 'evento456' } };
+        const res = mockResponse();
+  
+        const mockEvent = { _id: 'evento456', type: 'no_evaluado' };
+        sinon.stub(Event, 'findById').resolves(mockEvent);
+  
+        await isEvaluatedEvent(req, res);
+  
+        expect(Event.findById.calledWith('evento456')).to.be.true;
+        expect(res.status.calledWith(200)).to.be.true;
+        expect(res.json.calledWith({
+          message: 'Evaluación del tipo de evento',
+          isEvaluated: false,
+        })).to.be.true;
+      });
+  
+      it('debería devolver 404 si el evento no existe', async () => {
+        const req = { params: { id: 'evento789' } };
+        const res = mockResponse();
+  
+        sinon.stub(Event, 'findById').resolves(null);
+  
+        await isEvaluatedEvent(req, res);
+  
+        expect(Event.findById.calledWith('evento789')).to.be.true;
+        expect(res.status.calledWith(404)).to.be.true;
+        expect(res.json.calledWith({ message: 'Evento no encontrado' })).to.be.true;
+      });
+    });
   });
   

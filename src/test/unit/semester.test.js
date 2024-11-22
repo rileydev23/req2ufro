@@ -1,13 +1,13 @@
-import { createSemester, getSemester, editSemester, deleteSemester, getAllSemesters } from '../../controllers/semester.controller.js'; 
-import Semester from '../../schemas/semester.schema.js'; 
-
-jest.mock('../../schemas/semester.schema.js'); // Simular el modelo de Mongoose
+import { createSemester, getSemester, editSemester, deleteSemester, getAllSemesters } from '../../controllers/semester.controller.js';
+import Semester from '../../schemas/semester.schema.js';
+import { expect } from 'chai';
+import sinon from 'sinon';
 
 describe('Controlador de Semestres (Unitarias)', () => {
   const mockResponse = () => {
     const res = {};
-    res.status = jest.fn().mockReturnThis();
-    res.json = jest.fn().mockReturnThis();
+    res.status = sinon.stub().returns(res);
+    res.json = sinon.stub().returns(res);
     return res;
   };
 
@@ -17,7 +17,7 @@ describe('Controlador de Semestres (Unitarias)', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks(); // Limpiar los mocks después de cada prueba
+    sinon.restore(); // Restaurar los mocks después de cada prueba
   });
 
   describe('Crear Semestre', () => {
@@ -25,31 +25,27 @@ describe('Controlador de Semestres (Unitarias)', () => {
       const req = mockRequest({ name: 'Semestre 1', year: 2024, subjects: [] });
       const res = mockResponse();
 
-      Semester.mockImplementation(() => ({
-        save: jest.fn().mockResolvedValue(req.body),
-      }));
+      sinon.stub(Semester.prototype, 'save').resolves(req.body);
 
       await createSemester(req, res);
 
-      expect(res.status).toHaveBeenCalledWith(201);
-      expect(res.json).toHaveBeenCalledWith({
+      expect(res.status.calledWith(201)).to.be.true;
+      expect(res.json.calledWith({
         message: 'Semestre creado exitosamente',
         semestre: req.body,
-      });
+      })).to.be.true;
     });
 
     it('debería devolver un error al crear un semestre si ocurre un problema', async () => {
       const req = mockRequest({ name: 'Semestre 1', year: 2024 });
       const res = mockResponse();
 
-      Semester.mockImplementation(() => {
-        throw new Error('Error');
-      });
+      sinon.stub(Semester.prototype, 'save').throws(new Error('Error'));
 
       await createSemester(req, res);
 
-      expect(res.status).toHaveBeenCalledWith(500);
-      expect(res.json).toHaveBeenCalledWith({ error: 'Error al crear el semestre', details: 'Error' });
+      expect(res.status.calledWith(500)).to.be.true;
+      expect(res.json.calledWith({ error: 'Error al crear el semestre', details: 'Error' })).to.be.true;
     });
   });
 
@@ -59,23 +55,23 @@ describe('Controlador de Semestres (Unitarias)', () => {
       const res = mockResponse();
       const semesterData = { _id: '12345', name: 'Semestre 1', year: 2024 };
 
-      Semester.findById = jest.fn().mockResolvedValue(semesterData);
+      sinon.stub(Semester, 'findById').resolves(semesterData);
 
       await getSemester(req, res);
 
-      expect(res.json).toHaveBeenCalledWith(semesterData);
+      expect(res.json.calledWith(semesterData)).to.be.true;
     });
 
     it('debería devolver un error si el semestre no se encuentra', async () => {
       const req = mockRequest({}, { id: '12345' });
       const res = mockResponse();
 
-      Semester.findById = jest.fn().mockResolvedValue(null);
+      sinon.stub(Semester, 'findById').resolves(null);
 
       await getSemester(req, res);
 
-      expect(res.status).toHaveBeenCalledWith(404);
-      expect(res.json).toHaveBeenCalledWith({ message: 'Semestre no encontrado'});
+      expect(res.status.calledWith(404)).to.be.true;
+      expect(res.json.calledWith({ message: 'Semestre no encontrado' })).to.be.true;
     });
   });
 
@@ -85,23 +81,23 @@ describe('Controlador de Semestres (Unitarias)', () => {
       const res = mockResponse();
       const semesterData = { _id: '12345', name: 'Semestre 1', year: 2024 };
 
-      Semester.findByIdAndUpdate = jest.fn().mockResolvedValue(semesterData);
+      sinon.stub(Semester, 'findByIdAndUpdate').resolves(semesterData);
 
       await editSemester(req, res);
 
-      expect(res.json).toHaveBeenCalledWith({ message: 'Semestre actualizado', semestre: semesterData });
+      expect(res.json.calledWith({ message: 'Semestre actualizado', semestre: semesterData })).to.be.true;
     });
 
     it('debería devolver un error si el semestre a editar no se encuentra', async () => {
       const req = mockRequest({ name: 'Semestre Inexistente' }, { id: '12345' });
       const res = mockResponse();
 
-      Semester.findByIdAndUpdate = jest.fn().mockResolvedValue(null);
+      sinon.stub(Semester, 'findByIdAndUpdate').resolves(null);
 
       await editSemester(req, res);
 
-      expect(res.status).toHaveBeenCalledWith(404);
-      expect(res.json).toHaveBeenCalledWith({ message: 'Semestre no encontrado' });
+      expect(res.status.calledWith(404)).to.be.true;
+      expect(res.json.calledWith({ message: 'Semestre no encontrado' })).to.be.true;
     });
   });
 
@@ -111,23 +107,23 @@ describe('Controlador de Semestres (Unitarias)', () => {
       const res = mockResponse();
       const semesterData = { _id: '12345', name: 'Semestre 1', year: 2024 };
 
-      Semester.findByIdAndDelete = jest.fn().mockResolvedValue(semesterData);
+      sinon.stub(Semester, 'findByIdAndDelete').resolves(semesterData);
 
       await deleteSemester(req, res);
 
-      expect(res.json).toHaveBeenCalledWith({ message: 'Semestre eliminado' });
+      expect(res.json.calledWith({ message: 'Semestre eliminado' })).to.be.true;
     });
 
     it('debería devolver un error si el semestre a eliminar no se encuentra', async () => {
       const req = mockRequest({}, { id: '12345' });
       const res = mockResponse();
 
-      Semester.findByIdAndDelete = jest.fn().mockResolvedValue(null);
+      sinon.stub(Semester, 'findByIdAndDelete').resolves(null);
 
       await deleteSemester(req, res);
 
-      expect(res.status).toHaveBeenCalledWith(404);
-      expect(res.json).toHaveBeenCalledWith({ message: 'Semestre no encontrado'});
+      expect(res.status.calledWith(404)).to.be.true;
+      expect(res.json.calledWith({ message: 'Semestre no encontrado' })).to.be.true;
     });
   });
 
@@ -137,25 +133,23 @@ describe('Controlador de Semestres (Unitarias)', () => {
       const res = mockResponse();
       const semesterList = [{ _id: '12345', name: 'Semestre 1', year: 2024 }];
 
-      Semester.find = jest.fn().mockResolvedValue(semesterList);
+      sinon.stub(Semester, 'find').resolves(semesterList);
 
       await getAllSemesters(req, res);
 
-      expect(res.json).toHaveBeenCalledWith(semesterList);
+      expect(res.json.calledWith(semesterList)).to.be.true;
     });
 
     it('debería devolver un error si ocurre un problema al obtener los semestres', async () => {
       const req = mockRequest();
       const res = mockResponse();
 
-      Semester.find = jest.fn().mockImplementation(() => {
-        throw new Error('Error');
-      });
+      sinon.stub(Semester, 'find').throws(new Error('Error'));
 
       await getAllSemesters(req, res);
 
-      expect(res.status).toHaveBeenCalledWith(500);
-      expect(res.json).toHaveBeenCalledWith({ error: 'Error al obtener los semestres',  details: "Error"});
+      expect(res.status.calledWith(500)).to.be.true;
+      expect(res.json.calledWith({ error: 'Error al obtener los semestres', details: 'Error' })).to.be.true;
     });
   });
 });

@@ -29,14 +29,19 @@ describe('Pruebas de Humo para Usuarios', () => {
   });
 
   it('debería responder al intentar registrar un usuario', async () => {
+    const googleId = `test-google-id-${Date.now()}`; // Genera un googleId único
+    const email = `test-${Date.now()}@example.com`; // Genera un email único
+  
     const response = await request(app).post('/api/users/register').send({
-      googleId: 'test-google-id',
-      email: 'test@example.com',
+      googleId,
+      email,
       name: 'Usuario de Prueba',
       avatarUrl: 'http://example.com/avatar.jpg',
     });
     expect(response.status).to.not.equal(500);
   });
+  
+  
 
   it('debería responder al intentar iniciar sesión', async () => {
     await User.create({
