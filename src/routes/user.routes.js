@@ -1,7 +1,5 @@
 import express from "express";
 import {
-  registerUser,
-  loginUser,
   getUserById,
   getAllUsers,
   updateUser,

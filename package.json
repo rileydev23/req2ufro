@@ -22,6 +22,7 @@
   "description": "",
   "dependencies": {
     "bcrypt": "^5.1.1",
+    "body-parser": "^1.20.3",
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",
     "express": "^4.21.1",
@@ -29,7 +30,9 @@
     "mongoose": "^8.7.1",
     "nodemon": "^3.1.7",
     "nyc": "^17.1.0",
-    "re2ufrojs": "file:"
+    "re2ufrojs": "file:",
+    "swagger-jsdoc": "^6.2.8",
+    "swagger-ui-express": "^5.0.1"
   },
   "devDependencies": {
     "@babel/core": "^7.25.8",
