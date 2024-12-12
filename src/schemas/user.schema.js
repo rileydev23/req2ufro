@@ -12,6 +12,7 @@ const UserSchema = new mongoose.Schema({
     default: "student",
   },
   password: { type: String, required: true },
+  notificationToken: { type: String, unique: true, sparse: true },
 });
 
 const User = mongoose.model("User", UserSchema);

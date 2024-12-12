@@ -1,5 +1,6 @@
 import User from "../schemas/user.schema.js";
 import Semester from "../schemas/semester.schema.js";
+import { sendNotification } from "../google.js";
 
 // Registrar un nuevo usuario con Google OAuth
 export const registerUser = async (req, res) => {
@@ -177,5 +178,54 @@ export const getUserSemesters = async (req, res) => {
     res
       .status(500)
       .json({ error: "Error al obtener los semestres del usuario" });
+  }
+};
+
+export const updateNotificationToken = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { notificationToken } = req.body;
+
+    const updatedUser = await User.findByIdAndUpdate(
+      id,
+      { notificationToken },
+      { new: true }
+    );
+
+    if (!updatedUser) {
+      return res.status(404).json({ message: "Usuario no encontrado" });
+    }
+
+    res.status(200).json({ message: "Token de notificación actualizado" });
+  } catch (error) {
+    res
+      .status(500)
+      .json({ error: "Error al actualizar el token de notificación" });
+  }
+};
+
+export const sendTestNotification = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const user = await User.findById(id);
+    const { notificationToken } = user;
+    console.log("notificationToken:", notificationToken);
+    if (!notificationToken) {
+      return res
+        .status(404)
+        .json({ message: "Token de notificación no encontrado" });
+    }
+
+    await sendNotification(
+      notificationToken,
+      "PEDRO GAETE ha actualizado ICC203 - INTRODUCCION A LA INGENIERA",
+      "Las notas de la evaluación EV1 - MATRICES han sido publicadas"
+    );
+
+    res.status(200).json({ message: "Notificación de prueba enviada" });
+  } catch (error) {
+    res
+      .status(500)
+      .json({ error: "Error al enviar la notificación de prueba" });
   }
 };

@@ -2,6 +2,7 @@
 coverage# compiled output
 /dist
 /node_modules
+service-account-file.json
 
 # Logs
 logs
