@@ -129,8 +129,16 @@ export const addEventToSubject = async (req, res) => {
       { new: true }
     );
 
-    if (!updatedSubject) {
-      return res.status(404).json({ message: "Asignatura no encontrada" });
+    const updatedEvent = await Event.findByIdAndUpdate(
+      req.body.event,
+      { subject: req.params.id },
+      { new: true }
+    );
+
+    if (!updatedSubject || !updatedEvent) {
+      return res
+        .status(404)
+        .json({ message: "Asignatura o evento no encontrado" });
     }
 
     res.status(200).json({
@@ -177,5 +185,47 @@ export const calculateSubjectAverage = async (req, res) => {
     res
       .status(500)
       .json({ error: "Error al calcular el promedio de la asignatura" });
+  }
+};
+
+export const getEventsFromSubject = async (req, res) => {
+  try {
+    const userId = "672e6fdd0a50f8ecd0e22a50";
+    const subject = await Subject.findById(req.params.id).populate("events");
+    if (!subject) {
+      return res.status(404).json({ message: "Asignatura no encontrada" });
+    }
+
+    const events = await Event.find({ _id: { $in: subject.events } });
+
+    const eventsWithUserGrades = events.map((event) => {
+      // Find the grade object for the specific user
+      const userGrade = event.grades.find(
+        (grade) => grade.user.toString() === userId
+      );
+
+      // Return the event details with the grade
+      return {
+        _id: event._id,
+        title: event.title,
+        date: event.date,
+        type: event.type,
+        weight: event.weight,
+        grade: userGrade ? userGrade.grade : null, // Include grade if available, else null
+      };
+    });
+
+    res.status(200).json({
+      events: eventsWithUserGrades,
+      subject: {
+        _id: subject._id,
+        name: subject.name,
+        code: subject.code,
+      },
+    });
+  } catch (error) {
+    res
+      .status(500)
+      .json({ error: "Error al obtener los eventos de la asignatura" });
   }
 };

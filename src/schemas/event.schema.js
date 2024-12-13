@@ -1,24 +1,37 @@
-import mongoose from 'mongoose';
+import mongoose from "mongoose";
 
 const EventSchema = new mongoose.Schema({
   title: { type: String, required: true }, // Título del evento
-  type: { 
-    type: String, 
-    enum: ['evaluado', 'no_evaluado'], 
-    required: true 
-  }, // Tipo de evento
+  type: {
+    type: String,
+    enum: ["evaluado", "no_evaluado"],
+    required: true,
+  },
   date: { type: Date, required: true }, // Fecha del evento
-  grade: { 
-    type: Number, 
-    required: function () { return this.type === 'evaluado'; } 
-  }, // Nota solo para eventos evaluados
-  weight: { 
-    type: Number, 
-    required: function () { return this.type === 'evaluado'; },
-    min: 0, 
-    max: 100 
-  }, // Ponderación del evento evaluado
+  weight: {
+    type: Number,
+    required: function () {
+      return this.type === "evaluado";
+    },
+    min: 0,
+    max: 100,
+  },
+  grades: [
+    {
+      user: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+        required: true,
+      }, // Usuario asociado
+      grade: { type: Number, required: true }, // Nota del usuario
+    },
+  ],
+  subject: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Subject",
+  },
 });
 
-const Event = mongoose.model('Event', EventSchema);
+const Event = mongoose.model("Event", EventSchema);
+
 export default Event;

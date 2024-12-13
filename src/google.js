@@ -26,10 +26,11 @@ export async function getAccessToken() {
   }
 }
 
-export async function sendNotification(notificationToken, title, body) {
+export async function sendNotification(notificationToken, title, body, data) {
   console.log("notificationToken:", notificationToken);
   console.log("title:", title);
   console.log("body:", body);
+  console.log("data:", data);
 
   try {
     const accessToken = await getAccessToken();
@@ -50,10 +51,7 @@ export async function sendNotification(notificationToken, title, body) {
               title,
               body,
             },
-            data: {
-              score: "5x1",
-              time: "15:10",
-            },
+            data: data || {},
             android: {
               direct_boot_ok: true,
             },
