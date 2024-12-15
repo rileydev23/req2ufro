@@ -57,6 +57,7 @@ app.use("/api/subjects", verifyToken, subjectRouter);
 app.use("/api/events", verifyToken, eventRouter);
 
 app.get("/", (req, res) => {
+  console.log(req, "Hello, World!");
   res.send({ message: "Hello, World!" });
 });
 

@@ -190,7 +190,8 @@ export const calculateSubjectAverage = async (req, res) => {
 
 export const getEventsFromSubject = async (req, res) => {
   try {
-    const userId = "672e6fdd0a50f8ecd0e22a50";
+    console.log(req.user);
+    const userId = req.user.id;
     const subject = await Subject.findById(req.params.id).populate("events");
     if (!subject) {
       return res.status(404).json({ message: "Asignatura no encontrada" });

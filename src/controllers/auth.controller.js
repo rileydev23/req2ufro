@@ -50,12 +50,20 @@ export async function postRegister(req, res) {
   });
 }
 
+export async function regenerateToken(id) {
+  const user = await User.findById(id);
+  const token = generateToken(user);
+
+  return token;
+}
+
 function generateToken(user) {
   return jwt.sign(
     {
       name: user.email,
       id: user._id,
       role: user.role,
+      hasNotificationToken: !!user.notificationToken,
     },
     TOKEN_SECRET
   );

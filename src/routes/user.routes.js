@@ -10,6 +10,7 @@ import {
   getUserSemesters,
   updateNotificationToken,
   sendTestNotification,
+  getUserEvents,
 } from "../controllers/user.controller.js";
 
 const router = express.Router();
@@ -26,5 +27,6 @@ router.delete("/:id/semester/:semesterId", removeSemesterFromUser);
 router.post("/:id/assign-role", assignRoleToUser);
 router.post("/:id/notification-test", sendTestNotification);
 router.get("/:id/semesters", getUserSemesters);
+router.get("/:id/events", getUserEvents);
 
 export default router;

@@ -6,6 +6,7 @@ import Subject from "../schemas/subject.schema.js";
 export const createEvent = async (req, res) => {
   try {
     const { title, type, date, weight } = req.body;
+
     const newEvent = new Event({ title, type, date, weight });
     const savedEvent = await newEvent.save();
     res.status(201).json({
@@ -13,6 +14,7 @@ export const createEvent = async (req, res) => {
       event: savedEvent,
     });
   } catch (error) {
+    console.log(error);
     res.status(500).json({ error: "Error al crear el evento" });
   }
 };
