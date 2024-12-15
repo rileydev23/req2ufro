@@ -1,15 +1,22 @@
 import { JWT } from "google-auth-library";
-import { GOOGLE_APPLICATION_CREDENTIALS } from "./config/environment.js";
+import {
+  GOOGLE_APLICATION_CREDENTIALS_STRING,
+  GOOGLE_APPLICATION_CREDENTIALS,
+} from "./config/environment.js";
 import * as fs from "fs";
 const SCOPES = ["https://www.googleapis.com/auth/firebase.messaging"];
 
 export async function getAccessToken() {
-  console.log(GOOGLE_APPLICATION_CREDENTIALS);
+  // console.log(GOOGLE_APPLICATION_CREDENTIALS);
+  // console.log(GOOGLE_APLICATION_CREDENTIALS_STRING);
 
   try {
-    const key = JSON.parse(
-      fs.readFileSync(GOOGLE_APPLICATION_CREDENTIALS, "utf8")
-    );
+    // const key = JSON.parse(
+    //   fs.readFileSync(GOOGLE_APPLICATION_CREDENTIALS, "utf8")
+    // );
+
+    const key = JSON.parse(GOOGLE_APLICATION_CREDENTIALS_STRING);
+
     const jwtClient = new JWT(
       key.client_email,
       null,
